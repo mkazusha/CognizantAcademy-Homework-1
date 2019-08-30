@@ -1,16 +1,18 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
 import java.util.Random;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class AutomationPracticeTest extends WebDriverSettings {
+
+public class AutomationPracticeTest {
+    private ChromeDriver driver;
     private String URL = "http://automationpractice.com/index.php";
     private final By SELECT_WOMEN_SECTION = By.xpath(".//a[@title='Women']");
     private final By SELECT_DRESSES_SECTION = By.xpath("(.//a[@title = 'Find your favorites dresses from our wide choice of evening, casual or summer dresses! \n" +
@@ -43,6 +45,10 @@ public class AutomationPracticeTest extends WebDriverSettings {
 
     @Test
     public void checkFilter() {
+        System.setProperty("webdriver.chrome.driver", "C:/Users/Maria/Projects/CognizantAcademy/chromedriver.exe");
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+
         driver.get(URL);
         driver.findElement(SELECT_WOMEN_SECTION).click();
         driver.findElement(SELECT_DRESSES_SECTION).click();
@@ -58,40 +64,14 @@ public class AutomationPracticeTest extends WebDriverSettings {
             if (orange.equals(actualColor)) match++;
         }
         Assertions.assertEquals(size, match, "Filter is broken! Matched only " + match + " dresses but showed " + size);
-    }
-
-    @Test
-    public void checkSelectedColor() {
-        driver.get(URL);
-        driver.findElement(SELECT_WOMEN_SECTION).click();
-        driver.findElement(SELECT_DRESSES_SECTION).click();
-        driver.findElement(CHOOSE_ORANGE_COLOR).click();
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(ExpectedConditions.invisibilityOfAllElements());
-        dresses = driver.findElements(QUICK_VIEW_BTN);
-        size = dresses.size();
-        availableColors = driver.findElements(DRESS_COLORS);
-        orange = driver.findElement(ORANGE_COLOR).getAttribute("style");
-        dresses.get(rand.nextInt(size)).click();
-        driver.switchTo().frame(driver.findElement(QUICK_VIEW));
-        selectedColor = driver.findElement(SELECTED_COLOR);
-        actualColor = selectedColor.findElement(By.tagName("a")).getAttribute("style");
-        Assertions.assertEquals(orange, actualColor, "Orange color is not selected by default.");
-    }
-
-    @Test
-    public void checkCartSum() {
-        driver.get(URL);
-        driver.findElement(SELECT_WOMEN_SECTION).click();
-        driver.findElement(SELECT_DRESSES_SECTION).click();
-        dresses = driver.findElements(QUICK_VIEW_BTN);
-        size = dresses.size();
         for (int i = 0; i < 2; i++) {
-            dresses.get(rand.nextInt(size)).click();
+            dresses.get(rand.nextInt(size)).findElement(QUICK_VIEW_BTN).click();
             driver.switchTo().frame(driver.findElement(QUICK_VIEW));
+            selectedColor = driver.findElement(SELECTED_COLOR);
+            actualColor = selectedColor.findElement(By.tagName("a")).getAttribute("style");
+            Assertions.assertEquals(orange, actualColor, "Orange color is not selected by default.");
             price = driver.findElement(PRICE).getText();
             driver.findElement(ADD_TO_CART).click();
-            WebDriverWait wait = new WebDriverWait(driver, 10);
             wait.until(ExpectedConditions.visibilityOfElementLocated(CONTINUE_SHOPPING_BTN));
             driver.findElement(CONTINUE_SHOPPING_BTN).click();
             sum += convertValue(price);
@@ -100,7 +80,9 @@ public class AutomationPracticeTest extends WebDriverSettings {
         cartTotalPrice = driver.findElement(TOTAL_PRICE).getText();
         actualTotal = convertValue(cartTotalPrice);
         Assertions.assertEquals(sum, actualTotal, "Price is not correct!");
+        driver.quit();
     }
+
 
     public double convertValue(String stringNumber) {
         stringNumber = stringNumber.substring(1);
