@@ -11,7 +11,3 @@ Automation Test Task
 6. Open one item and check if orange is selected
 7. Add 2 different items to cart and check that price sum is calculated correctly
 
-Scenario was divided into 3 tests:
-- checkFilter()
-- checkSelectedColor()
-- checkCartSum
